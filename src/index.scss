@@ -1,0 +1,103 @@
+$lib-dems-color: #faa61a;
+$labour-color: #ef003b;
+$greens-color: #6ab023;
+$tories-color: #0087dc;
+$plaid-cymru-color: #3f8428;
+$snp-color: #fff95d;
+$sinn-fein-color: #326760;
+$dup-color: #d46a4c;
+$alliance-color: #f6cb2f;
+$uup-color: #48a5ee;
+$sdlp-color: #2aa82c;
+
+$family-sans-serif: "Open Sans", sans-serif;
+
+@import "~bulma";
+
+.subtitle {
+  margin-top: $box-padding;
+}
+
+.parliament {
+  line-height: 12px;
+}
+
+.parliament__seat {
+  background-color: $grey;
+  display: inline-block;
+  height: 12px;
+  margin: 2px;
+  width: 12px;
+}
+
+.parliament__seat--Labour {
+  background-color: $labour-color;
+}
+
+.parliament__seat--Conservative {
+  background-color: $tories-color;
+}
+
+.parliament__seat--Liberal-Democrats {
+  background-color: $lib-dems-color;
+}
+
+.parliament__seat--Plaid-Cymru {
+  background-color: $plaid-cymru-color;
+}
+
+.parliament__seat--SNP {
+  background-color: $snp-color;
+}
+
+.parliament__seat--Sinn-Féin {
+  background-color: $sinn-fein-color;
+}
+
+.parliament__seat--Alliance {
+  background-color: $alliance-color;
+}
+
+.parliament__seat--DUP {
+  background-color: $dup-color;
+}
+
+.parliament__seat--UUP {
+  background-color: $uup-color;
+}
+
+.parliament__seat--SDLP {
+  background-color: $sdlp-color;
+}
+
+.parliament__party-name {
+  display: block;
+  font-weight: bold;
+  height: 2em;
+}
+
+.leaflet-container {
+  height: 600px;
+  width: 100%;
+}
+
+.is-loading {
+  opacity: 0.5;
+  pointer-events: none;
+  position: relative;
+
+  &:after {
+    @include loader;
+    border-width: 0.25em;
+    height: 5em;
+    left: calc(50% - 2.5em);
+    position: absolute;
+    top: calc(50% - 2.5em);
+    width: 5em;
+    z-index: 10;
+  }
+
+  .leaflet-container {
+    display: none;
+  }
+}

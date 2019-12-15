@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>What if... we had proportional representation</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css?family=Open+Sans:400,700&display=swap"
+    />
+  </head>
+  <body>
+    <section class="hero is-primary is-bold">
+      <div class="hero-body">
+        <div class="container">
+          <h1 class="title">
+            What if...
+          </h1>
+          <h2 class="subtitle">
+            We elected our MPs the same way we elect our MEPs?
+          </h2>
+        </div>
+      </div>
+    </section>
+    <section class="hero is-danger">
+      <div class="hero-body">
+        <div class="container">
+          <p class="title">
+            This site currently contains 2017 election data.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="columns">
+          <div class="column is-three-fifths is-offset-one-fifth content">
+            <p>
+              The way we elect our MPs is a system called First Past The Post. Under First Past The
+              Post, a single winner in each individual constituency gets to represent that
+              constituency in Westminster. When Parliament is formed, this means lots of small
+              victories in constituencies can mean big results for one party, and the overall makeup
+              of parliament does not reflect the way the country as a whole voted. For more
+              information about why this is bad, you can read my
+              <a href="https://medium.com/@cnorthwood/a-note-on-democracy-ab2a20f0ec22"
+                >Note on Democracy</a
+              >
+              on my blog.
+            </p>
+            <p>
+              There are, of course, many other ways of running elections and working out who is the
+              winner. The two most common variations are one where you elect more than one person,
+              and the votes are distributed to make the makeup of those elected match the
+              proportions of the vote. The other variation is where you can rank the candidates, so
+              a candidate must receive 50% of the votes to win. If no candidate has received 50% of
+              the vote, then the candidate with the least votes is eliminated, and all the votes
+              that went to that candidate are redistributed to the remaining candidates based on the
+              next order in the rank for each voter. This continues until one candidate receives a
+              majority of the vote.
+            </p>
+            <p>
+              There is history in the UK for these variations. Until 1950, some constituencies could
+              send more than one MP to parliament, and we have run elections in the past where
+              candidates could be ranked. The three main voting systems to think about are:
+            </p>
+            <ul>
+              <li>
+                The Alternative Vote: where you elect a single MP, but rank your choices. We had a
+                referendum on this in 2011, but only 32% of voters backed the change to this system.
+              </li>
+              <li>
+                Single Transferrable Vote: this is a combination of ranking, and electing multiple
+                members. It is one of the most used election systems in the world, and is used in
+                Northern Ireland for EU, local and assembly elections, as well as in Scotland for
+                local elections.
+              </li>
+              <li>
+                D'Hondt method: this is where you can elect multiple members, but you only choose
+                one. This is how England, Wales and Scotland elect MEPs.
+              </li>
+            </ul>
+            <p>
+              This is an experiment where we consider what might happen if we elected our MPs the
+              same way we elected our MEPs. We have the data we need to simulate this, because the
+              method of making a selection is the same, but instead of having 1 MP to represent an
+              area, we can imagine having many. In this experiment, I've combined our existing
+              constituency boundaries into new constituencies, which overall elect 600 MPs to
+              Parliament (the number proposed under the most recent electoral reform), but each
+              constituency elects on average 8 MPs. In theory, this should result in a more
+              representative parliament, but one where coalition governments become common, as it
+              makes it harder for a government to get a majority, unless they also get a majority of
+              the votes, which rarely happens.
+            </p>
+            <p>
+              There are, of course, caveats. We can assume some people may vote differently if the
+              system was different, there may be less tactical voting, for example. The boundaries
+              I've crudely drawn are simply the same as existing constituencies added together, but
+              in the real world, a lot more care and attention would go into the boundaries. I've
+              also invented some new names, and I didn't put too much thought into it, so please
+              don't complain too much if the name doesn't make sense.
+            </p>
+          </div>
+        </div>
+        <div id="root">
+          <noscript>You need to enable JavaScript to run this app.</noscript>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="container content has-text-centered">
+        <p><i>What if...</i> by <a href="https://cjn.me.uk">Chris Northwood</a>.</p>
+        <p>
+          This includes data from <a href="http://osni-spatial-ni.opendata.arcgis.com/">OSNI</a> and
+          <a href="https://www.ordnancesurvey.co.uk/business-government/products/boundaryline"
+            >Ordnance Survey</a
+          >
+          which is licensed under the
+          <a href="http://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"
+            >Open Government License</a
+          >.
+        </p>
+        <p>
+          <a href="https://github.com/cnorthwood/what-if-proportional-representation/"
+            >Fork me on GitHub</a
+          >.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

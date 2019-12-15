@@ -1,1 +1,4 @@
-data/results.json
+build
+node_modules
+src/data.json
+public/geometries/

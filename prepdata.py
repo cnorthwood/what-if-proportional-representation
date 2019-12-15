@@ -3,6 +3,7 @@
 from collections import defaultdict
 import csv
 import json
+from os import makedirs
 from shapely.geometry import mapping, shape
 from shapely.ops import cascaded_union
 import sys
@@ -85,7 +86,7 @@ for constituency in CONSTITUENCIES.values():
             continue
         PARLIAMENT[party] += seats
 
-with open("data/results.json", "w") as output_file:
+with open("src/data.json", "w") as output_file:
     json.dump({
         "parliament": PARLIAMENT,
         "constituencies": {
@@ -93,11 +94,16 @@ with open("data/results.json", "w") as output_file:
                 "electorate": constituency["electorate"],
                 "seats": constituency["seats"],
                 "formedFrom": constituency["formed_from"],
+                "votes": constituency["votes"],
                 "seatAllocations": constituency["seat_allocations"],
-                "geojson": {
-                    "type": "Feature",
-                    "properties": {"name": constituency_name},
-                    "geometry": mapping(constituency["geometry"])
-                },
             } for constituency_name, constituency in CONSTITUENCIES.items()}
     }, output_file)
+
+makedirs("public/geometries/", exist_ok=True)
+for constituency_name, constituency in CONSTITUENCIES.items():
+    with open(f"public/geometries/{constituency_name}.geojson", "w") as geojson_file:
+        json.dump({
+            "type": "Feature",
+            "properties": {"name": constituency_name},
+            "geometry": mapping(constituency["geometry"])
+        }, geojson_file)
