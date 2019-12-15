@@ -11,6 +11,7 @@ const Seats: FunctionComponent<{
     <div className="columns">
       {Object.keys(seats)
         .filter(partyName => seats[partyName] > 0)
+        .sort((a, b) => seats[b] - seats[a])
         .map(partyName => (
           <div key={partyName} className="column has-text-centered">
             <span className="parliament__party-name">{partyName}</span>
