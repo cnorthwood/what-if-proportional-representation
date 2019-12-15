@@ -1,7 +1,8 @@
 $lib-dems-color: #faa61a;
 $labour-color: #ef003b;
-$greens-color: #6ab023;
+$green-party-color: #6ab023;
 $tories-color: #0087dc;
+$brexit-color: #12b6cf;
 $plaid-cymru-color: #3f8428;
 $snp-color: #fff95d;
 $sinn-fein-color: #326760;
@@ -30,19 +31,27 @@ $family-sans-serif: "Open Sans", sans-serif;
   width: 12px;
 }
 
-.parliament__seat--Labour {
+.parliament__seat--Lab {
   background-color: $labour-color;
 }
 
-.parliament__seat--Conservative {
+.parliament__seat--Con {
   background-color: $tories-color;
 }
 
-.parliament__seat--Liberal-Democrats {
+.parliament__seat--Lib-Dem {
   background-color: $lib-dems-color;
 }
 
-.parliament__seat--Plaid-Cymru {
+.parliament__seat--Brexit {
+  background-color: $brexit-color;
+}
+
+.parliament__seat--Green {
+  background-color: $green-party-color;
+}
+
+.parliament__seat--PC {
   background-color: $plaid-cymru-color;
 }
 
@@ -50,7 +59,7 @@ $family-sans-serif: "Open Sans", sans-serif;
   background-color: $snp-color;
 }
 
-.parliament__seat--Sinn-Féin {
+.parliament__seat--SF {
   background-color: $sinn-fein-color;
 }
 

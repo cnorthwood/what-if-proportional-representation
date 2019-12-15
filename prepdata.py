@@ -4,6 +4,7 @@ from collections import defaultdict
 import csv
 import json
 from os import makedirs
+import requests
 from shapely.geometry import mapping, shape
 from shapely.ops import cascaded_union
 import sys
@@ -26,21 +27,19 @@ with open("data/constituency-allocations.csv", encoding="utf-8-sig") as data_fil
 
 # 2. Load in the election results
 RESULTS = defaultdict(dict)
-with open("data/results-2017.csv", encoding="utf-8-sig") as data_file:
-    csv_reader = csv.reader(data_file)
-    for row in csv_reader:
-        constituency_id = row[0]
-        constituency_name = row[2]
-        party = row[6]
-        votes = int(row[7])
-        for constituency in CONSTITUENCIES.values():
-            if constituency_name in constituency["formed_from"]:
-                constituency["formed_from_ids"].add(constituency_id)
-                constituency["votes"][party] += votes
-                break
-        else:
-            print(f"{constituency_name} does not appear to have been merged in anywhere??")
-            sys.exit(1)
+response = requests.get("https://interactive.guim.co.uk/2019/12/ukelection2019-data/prod/snap/full.json")
+response.raise_for_status()
+for seat in response.json():
+    seat_name = seat["name"].replace("&", "and").replace(",", "").replace("Hull", "Kingston upon Hull")
+    for constituency in CONSTITUENCIES.values():
+        if any(set(seat_name.lower().split(" ")) == set(formed_from.lower().replace(",", "").strip(" 56").split(" ")) for formed_from in constituency["formed_from"]):
+            constituency["formed_from_ids"].add(seat["ons"])
+            for candidate in seat["candidates"]:
+                constituency["votes"][candidate["party"]] += candidate["votes"]
+            break
+    else:
+        print(f"{seat_name} does not appear to have been merged in anywhere??")
+        sys.exit(1)
 
 
 # 3. Load in constituency boundaries
