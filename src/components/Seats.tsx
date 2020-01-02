@@ -4,8 +4,9 @@ import Seat from "./Seat";
 
 const Seats: FunctionComponent<{
   seats: Record<string, number>;
+  topup?: Record<string, number>;
   votes?: Record<string, number>;
-}> = ({ seats, votes }) => (
+}> = ({ seats, topup, votes }) => (
   <>
     {" "}
     <div className="columns">
@@ -17,7 +18,8 @@ const Seats: FunctionComponent<{
             <span className="parliament__party-name">{partyName}</span>
             <br />
             <span className="is-size-1">{seats[partyName]}</span>
-            <p>{votes ? <>{votes[partyName].toLocaleString()} votes</> : null}</p>
+            {topup ? <p>{topup[partyName]} from top-up</p> : null}
+            {votes ? <p>{votes[partyName].toLocaleString()} votes</p> : null}
           </div>
         ))}
       {votes ? (

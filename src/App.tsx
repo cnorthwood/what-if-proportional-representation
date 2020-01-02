@@ -1,158 +1,65 @@
-import { GeoJsonObject } from "geojson";
-import React, { ChangeEvent, Component, createRef, RefObject } from "react";
-import { GeoJSON, Map, TileLayer } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import React, { Component } from "react";
 
-import Constituency from "./components/Constituency";
-import Seats from "./components/Seats";
+import Visualisation, { VisualisationProps } from "./Visualisation";
+import data from "./data.json";
 
-interface AppProps {
-  parliament: Record<string, number>;
-  constituencies: Record<
-    string,
-    {
-      electorate: string;
-      seats: number;
-      formedFrom: string[];
-      seatAllocations: Record<string, number>;
-      votes: Record<string, number>;
-    }
-  >;
-}
-
+interface AppProps {}
 interface AppState {
-  selectedConstituency: string | null;
-  geometry: GeoJsonObject | null;
-  geometries: Record<string, GeoJsonObject>;
-  geometryLoading: boolean;
+  data?: VisualisationProps;
 }
 
 export default class App extends Component<AppProps, AppState> {
-  private mapRef: RefObject<Map>;
-
   constructor(props: AppProps) {
     super(props);
-    this.state = {
-      selectedConstituency: new URLSearchParams(window.location.search).get("constituency"),
-      geometry: null,
-      geometries: {},
-      geometryLoading: false,
-    };
-    this.onChangeConstituency = this.onChangeConstituency.bind(this);
-    this.mapRef = createRef();
-  }
-
-  public componentDidMount() {
-    this.loadGeometry();
-  }
-
-  public componentDidUpdate(prevProps: Readonly<AppProps>, prevState: Readonly<AppState>) {
-    if (prevState.selectedConstituency !== this.state.selectedConstituency) {
-      this.loadGeometry();
-    }
+    this.state = {};
   }
 
   public render() {
     return (
       <>
-        <h2 className="subtitle">Parliament</h2>
-        <Seats seats={this.props.parliament} />
-        <h2 className="subtitle">Constituencies</h2>
-        <div className="columns">
-          <div className={`column ${this.state.geometryLoading ? "is-loading" : ""}`}>
-            <Map center={[54.093409, -2.89479]} zoom={5} ref={this.mapRef}>
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-              />
-              {this.state.geometry ? <GeoJSON data={this.state.geometry} /> : null}
-            </Map>
+        <div className="columns content">
+          <div className="column">
+            <h2 className="title">Multi-member Constituencies</h2>
+            <p>
+              Instead of having 1 MP to represent an area, we can imagine having many. In this
+              experiment, I've combined our existing constituency boundaries into new
+              constituencies, which overall elect 600 MPs to Parliament (the number proposed under
+              the most recent electoral reform), but each constituency elects on average 8 MPs. The{" "}
+              <a href="https://en.wikipedia.org/wiki/D%27Hondt_method">D'Hondt method</a> is used to
+              determine the allocation of parties to seats.
+            </p>
+            <p>
+              <button
+                className="button is-primary"
+                onClick={() => {
+                  this.setState({ data: data.multimember });
+                }}
+              >
+                Run this experiment
+              </button>
+            </p>
           </div>
           <div className="column">
-            <div className="field">
-              <label className="label" htmlFor="select-constituency">
-                Select a constituency:
-              </label>
-              <div className="control">
-                <div className="select">
-                  <select
-                    name="select-constituency"
-                    id="select-constituency"
-                    value={this.state.selectedConstituency || ""}
-                    onChange={this.onChangeConstituency}
-                  >
-                    {this.state.selectedConstituency === null ? <option /> : null}
-                    {this.getExistingConstituencies().map(constituency => (
-                      <option key={constituency}>{constituency}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-            </div>
-            {this.state.selectedConstituency === null ? (
-              <div className="message is-info">
-                <p className="message-body">
-                  Please select your current constituency from the list above, to see what the
-                  results would look like under this new system.
-                </p>
-              </div>
-            ) : (
-              <Constituency {...this.currentConstituency()!} />
-            )}
+            <h2 className="title">Top-up votes</h2>
+            <p>
+              This experiment is like the other one, with larger, multi-member seats, but only 300
+              MPs are sent to parliament. The other 300 MPs in parliament are determined by the national
+              vote (so, pure PR using D'Hondt).
+            </p>
+            <p>
+              <button
+                className="button is-primary"
+                onClick={() => {
+                  this.setState({ data: data.withTopup });
+                }}
+              >
+                Run this experiment
+              </button>
+            </p>
           </div>
         </div>
+        {this.state.data ? <Visualisation {...this.state.data} /> : null}
       </>
     );
-  }
-
-  private onChangeConstituency(ev: ChangeEvent<HTMLSelectElement>) {
-    this.setState({ selectedConstituency: ev.currentTarget.value });
-    window.history.replaceState("", "", `?constituency=${ev.currentTarget.value}`);
-  }
-
-  private currentConstituency() {
-    return this.getConstituencyFromOldConstituency(this.state.selectedConstituency);
-  }
-
-  private getConstituencyFromOldConstituency(existingConstituency: string | null) {
-    if (!existingConstituency) {
-      return null;
-    }
-    for (let constituencyName in this.props.constituencies) {
-      const constituency = this.props.constituencies[constituencyName];
-      if (constituency.formedFrom.includes(existingConstituency)) {
-        return { name: constituencyName, ...constituency };
-      }
-    }
-    return null;
-  }
-
-  private getExistingConstituencies() {
-    const existingConstituencies: string[] = [];
-    Object.values(this.props.constituencies).forEach(constituency => {
-      existingConstituencies.push(...constituency.formedFrom);
-    });
-    return existingConstituencies.sort();
-  }
-
-  private async loadGeometry() {
-    this.setState({ geometry: null, geometryLoading: true });
-    const currentConstituency = this.currentConstituency();
-    if (!currentConstituency) {
-      return;
-    }
-    const constituencyName = currentConstituency.name;
-    if (this.state.geometries[constituencyName]) {
-      this.setState({ geometry: this.state.geometries[constituencyName], geometryLoading: false });
-      return;
-    }
-
-    const response = await fetch(`geometries/${constituencyName}.geojson`);
-    const geometry = (await response.json()) as GeoJsonObject;
-    const maybeChangedConstituency = this.currentConstituency();
-    this.setState({ geometries: { ...this.state.geometries, [constituencyName]: geometry } });
-    if (maybeChangedConstituency && maybeChangedConstituency.name === constituencyName) {
-      this.setState({ geometry, geometryLoading: false });
-    }
   }
 }

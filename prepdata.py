@@ -19,7 +19,8 @@ with open("data/constituency-allocations.csv", encoding="utf-8-sig") as data_fil
         CONSTITUENCIES[row[0]] = {
             "electorate": row[1].strip(),
             "seats": int(row[2]),
-            "formed_from": [constituency for constituency in row[3:] if constituency],
+            "seats_topup": int(row[3]),
+            "formed_from": [constituency for constituency in row[4:] if constituency],
             "formed_from_ids": set(),
             "votes": defaultdict(int),
         }
@@ -35,7 +36,8 @@ for seat in response.json():
         if any(set(seat_name.lower().split(" ")) == set(formed_from.lower().replace(",", "").strip(" 56").split(" ")) for formed_from in constituency["formed_from"]):
             constituency["formed_from_ids"].add(seat["ons"])
             for candidate in seat["candidates"]:
-                constituency["votes"][candidate["party"]] += candidate["votes"]
+                party = f"{candidate['firstName']} {candidate['surname']}" if candidate["party"] == "Ind" else candidate["party"]
+                constituency["votes"][party] += candidate["votes"]
             break
     else:
         print(f"{seat_name} does not appear to have been merged in anywhere??")
@@ -58,8 +60,11 @@ with open("data/ni.geojson") as ni_geojson_file:
 
 
 # 4. Check we've correctly parsed everything
+for name, constituency in CONSTITUENCIES.items():
+    if len(constituency["formed_from"]) != len(constituency["formed_from_ids"]):
+        print(name, constituency)
 assert(all(len(constituency["formed_from"]) == len(constituency["formed_from_ids"]) for constituency in CONSTITUENCIES.values()))
-assert(all(all(constituency_id in GEOMETRIES for constituency_id in constituency["formed_from_ids"]) for constituency in CONSTITUENCIES.values()))
+assert(all(constituency_id in GEOMETRIES for constituency in CONSTITUENCIES.values() for constituency_id in constituency["formed_from_ids"]))
 
 
 # 5. Create combined boundaries
@@ -76,33 +81,72 @@ def dhondt(votes, seats_available):
     return allocations
 
 
-PARLIAMENT = defaultdict(int)
+MM_PARLIAMENT = defaultdict(int)
 for constituency in CONSTITUENCIES.values():
     seat_allocations = dhondt(constituency["votes"], constituency["seats"])
     constituency["seat_allocations"] = seat_allocations
     for party, seats in seat_allocations.items():
         if seats == 0:
             continue
-        PARLIAMENT[party] += seats
+        MM_PARLIAMENT[party] += seats
+
+
+TOPUP_PARLIAMENT = defaultdict(int)
+TOTAL_VOTES = defaultdict(int)
+for constituency in CONSTITUENCIES.values():
+    seat_allocations = dhondt(constituency["votes"], constituency["seats_topup"])
+    for party, votes in constituency["votes"].items():
+        TOTAL_VOTES[party] += votes
+    constituency["seat_allocations_topup"] = seat_allocations
+    for party, seats in seat_allocations.items():
+        if seats == 0:
+            continue
+        TOPUP_PARLIAMENT[party] += seats
+
+NUM_TOPUP_SEATS = 300
+TOPUP_SEATS = dhondt(TOTAL_VOTES, NUM_TOPUP_SEATS)
+for party, seats in TOPUP_SEATS.items():
+    if seats == 0:
+        continue
+    TOPUP_PARLIAMENT[party] += seats
 
 with open("src/data.json", "w") as output_file:
     json.dump({
-        "parliament": PARLIAMENT,
-        "constituencies": {
-            constituency_name: {
-                "electorate": constituency["electorate"],
-                "seats": constituency["seats"],
-                "formedFrom": constituency["formed_from"],
-                "votes": constituency["votes"],
-                "seatAllocations": constituency["seat_allocations"],
-            } for constituency_name, constituency in CONSTITUENCIES.items()}
+        "multimember": {
+            "parliament": MM_PARLIAMENT,
+            "constituencies": {
+                constituency_name: {
+                    "electorate": constituency["electorate"],
+                    "seats": constituency["seats"],
+                    "formedFrom": constituency["formed_from"],
+                    "votes": constituency["votes"],
+                    "seatAllocations": constituency["seat_allocations"],
+                } for constituency_name, constituency in CONSTITUENCIES.items()
+            },
+        },
+        "withTopup": {
+            "parliament": TOPUP_PARLIAMENT,
+            "constituencies": {
+                constituency_name: {
+                    "electorate": constituency["electorate"],
+                    "seats": constituency["seats_topup"],
+                    "formedFrom": constituency["formed_from"],
+                    "votes": constituency["votes"],
+                    "seatAllocations": constituency["seat_allocations_topup"],
+                } for constituency_name, constituency in CONSTITUENCIES.items()
+            },
+            "topup": TOPUP_SEATS,
+        }
     }, output_file)
 
 makedirs("public/geometries/", exist_ok=True)
 for constituency_name, constituency in CONSTITUENCIES.items():
     with open(f"public/geometries/{constituency_name}.geojson", "w") as geojson_file:
-        json.dump({
-            "type": "Feature",
-            "properties": {"name": constituency_name},
-            "geometry": mapping(constituency["geometry"])
-        }, geojson_file)
+        json.dump(
+            {
+                "type": "Feature",
+                "properties": {"name": constituency_name},
+                "geometry": mapping(constituency["geometry"])
+            },
+            geojson_file
+        )
