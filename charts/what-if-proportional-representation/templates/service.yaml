@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "what-if-proportional-representation.fullname" . }}
+  labels:
+    {{- include "what-if-proportional-representation.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "what-if-proportional-representation.selectorLabels" . | nindent 4 }}
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "what-if-proportional-representation.fullname" . }}
+  labels:
+    {{- include "what-if-proportional-representation.labels" . | nindent 4 }}
+  annotations:
+    {{- with .Values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  rules:
+    - host: {{ .Values.ingress.hostname }}
+      http:
+        paths:
+          - path: /whatifelection
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "what-if-proportional-representation.fullname" . }}
+                port:
+                  name: http
+  tls:
+    {{- with .Values.ingress.tls }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
