@@ -1,0 +1,24 @@
+name: PR build
+on:
+  pull_request:
+
+jobs:
+  build:
+    name: Build image (no push)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v6
+        with:
+          lfs: true
+
+      - name: set up Docker buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false

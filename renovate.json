@@ -1,0 +1,55 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "mode": "full",
+  "enabledManagers": [
+    "dockerfile",
+    "github-actions"
+  ],
+  "ignoreDeps": [
+    "ghcr.io/cnorthwood/what-if-proportional-representation"
+  ],
+  "packageRules": [
+    {
+      "description": "Build-stage toolchain is intentionally pinned to old versions",
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "matchPackageNames": [
+        "node"
+      ],
+      "enabled": false
+    },
+    {
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "pinDigests": true
+    },
+    {
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "matchUpdateTypes": [
+        "digest",
+        "pinDigest"
+      ],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": false
+    },
+    {
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "github-actions (minor and patch)",
+      "automerge": false
+    }
+  ]
+}
